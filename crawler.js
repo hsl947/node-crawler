@@ -3,6 +3,16 @@ const fs = require("fs");
 const http = require("http");
 const path = require("path");
 
+const rootPath = './game'
+if (fs.existsSync(rootPath)) {
+  fs.rmdir(rootPath, (err) =>{
+    if (err) return;
+    fs.mkdirSync(rootPath);
+ });
+} else {
+  fs.mkdirSync(rootPath);
+}
+
 // 递归创建目录 同步方法
 function mkdirsSync(dirname) {
   if (fs.existsSync(dirname)) {
@@ -42,7 +52,7 @@ const getCss = new Crawler({
     } else {
       const html = res.body;
       const filename = res.options.filename;
-      const staticPath = '_nuxt'
+      const staticPath =`${rootPath}/_nuxt`
 
       if (!fs.existsSync(staticPath)) {
         fs.mkdirSync(staticPath);
@@ -71,8 +81,9 @@ const getPage = new Crawler({
       console.log('error3', error);
     } else {
       const html = res.body;
+      const filename = res.options.filename;
       // 只匹配 __NUXT：/<script>[\s\S]+?<\/script>/g
-      fs.createWriteStream(res.options.filename).write(
+      fs.createWriteStream(`./${rootPath}/${filename}`).write(
         html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "").replace(/\/_nuxt\//g, './_nuxt/')
       );
       getCssUrl(html).forEach((item) => {
