@@ -86,11 +86,17 @@ const getPage = new Crawler({
       fs.createWriteStream(`./${rootPath}/${filename}`).write(
         html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "").replace(/\/_nuxt\//g, './_nuxt/')
       );
-      getCssUrl(html).forEach((item) => {
-        getCss.queue({
-          uri: `https://www.shangniu.cn${item}`,
-          filename: item.substring(7).split('?')[0],
-        });
+
+      console.log(`当前抓取的页面为：${filename}`)
+
+      const cssArr = getCssUrl(html)
+      cssArr && cssArr.forEach((item) => {
+        if(!fs.existsSync(item)) {
+          getCss.queue({
+            uri: `https://www.shangniu.cn${item}`,
+            filename: item.substring(7).split('?')[0],
+          });
+        }
       });
     }
     done();
@@ -134,19 +140,26 @@ const fetch = () => {
 fetch()
   .then((res) => {
     // console.log('res: ', res);
-    // for(let url of res) {
-    //   c.queue({
-    //     uri: 'https://www.shangniu.cn/',
-    //     filename: "shangniu.html"
-    //   });
-    // }
-    for (let k = 0; k < 3; k++) {
-      const arr = res[k].split("/");
+
+    for(let uri of res) {
+      const arr = uri.split("/");
+      const filename = `${arr[4]}-${arr[5]}.html`
+      // 文件已存在就跳过
+      if(fs.existsSync(`./${rootPath}/${filename}`)) continue;
       getPage.queue({
-        uri: res[k],
-        filename: `${arr[4]}-${arr[5]}.html`,
+        uri,
+        filename
       });
     }
+
+    // for (let k = 0; k < 3; k++) {
+    //   const arr = res[k].split("/");
+    //   getPage.queue({
+    //     uri: res[k],
+    //     filename: `${arr[4]}-${arr[5]}.html`
+    //   });
+    // }
+
   })
   .catch((err) => {
     console.log("err: ", err);
