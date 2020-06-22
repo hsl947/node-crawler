@@ -2,16 +2,7 @@ const Crawler = require("crawler");
 const fs = require("fs");
 const http = require("http");
 const path = require("path");
-
 const rootPath = './game'
-if (fs.existsSync(rootPath)) {
-  fs.rmdir(rootPath, (err) =>{
-    if (err) return;
-    fs.mkdirSync(rootPath);
- });
-} else {
-  fs.mkdirSync(rootPath);
-}
 
 // 递归创建目录 同步方法
 function mkdirsSync(dirname) {
@@ -23,6 +14,11 @@ function mkdirsSync(dirname) {
       return true;
     }
   }
+}
+
+// 根目录不存在的话，创建
+if (!fs.existsSync(rootPath)) {
+  mkdirsSync(rootPath);
 }
 
 // 获取css文件路径，用于下载
@@ -55,7 +51,7 @@ const getCss = new Crawler({
       const staticPath =`${rootPath}/_nuxt`
 
       if (!fs.existsSync(staticPath)) {
-        fs.mkdirSync(staticPath);
+        mkdirsSync(staticPath);
       }
       if(filename.includes('/')) {
         const arr = filename.split('/')
