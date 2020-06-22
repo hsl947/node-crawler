@@ -80,7 +80,7 @@ const getPage = new Crawler({
       const filename = res.options.filename;
       // 只匹配 __NUXT：/<script>[\s\S]+?<\/script>/g
       fs.createWriteStream(`./${rootPath}/${filename}`).write(
-        html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "").replace(/\/_nuxt\//g, './_nuxt/')
+        html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "").replace(/href="\/_nuxt\//g, `href="./_nuxt/`)
       );
 
       console.log(`当前抓取的页面为：${filename}`)
@@ -108,14 +108,24 @@ const opt = {
   },
 };
 
+const opt2 = {
+  host: "121.40.239.167",
+  port: '9008',
+  method: "GET",
+  path: "/api/battle/common/getUrlList2",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+  },
+};
+
 const params = JSON.stringify({ gameType: "" });
 
 // 获取要爬的页面地址数组
-const fetch = () => {
+const fetch = (config) => {
   return new Promise((resolve, reject) => {
     let urlList = "";
     const req = http
-      .request(opt, (res) => {
+      .request(config, (res) => {
         res
           .on("data", (data) => {
             urlList += data;
@@ -133,10 +143,10 @@ const fetch = () => {
   });
 };
 
-fetch()
+fetch(opt)
   .then((res) => {
     // console.log('res: ', res);
-
+    // 正式爬
     for(let uri of res) {
       const arr = uri.split("/");
       const filename = `${arr[4]}-${arr[5]}.html`
@@ -148,6 +158,7 @@ fetch()
       });
     }
 
+    // 先模拟几个
     // for (let k = 0; k < 3; k++) {
     //   const arr = res[k].split("/");
     //   getPage.queue({
@@ -156,6 +167,40 @@ fetch()
     //   });
     // }
 
+  })
+  .catch((err) => {
+    console.log("err: ", err);
+  });
+
+fetch(opt2)
+  .then((res) => {
+    // console.log('res: ', res);
+    const maxNum = 2000
+    const maxLen = Math.ceil(res.length / maxNum)
+    // 百度自动提交一次只能 2000个
+    for(let k = 0; k < maxLen; k ++) {
+      const sliceArr = res.slice(k * maxNum, (k + 1) * maxNum)
+      const all = sliceArr.reduce((prev, next)=> prev + '\n' + next, '')
+      fs.writeFile(`./match-urls${k+1}.txt`, all,'utf8',function(err){
+        //如果err=null，表示文件使用成功，否则，表示希尔文件失败
+        if(err) {
+          console.log('写文件出错了，错误是：'+err);
+          return
+        }
+        console.log('生成 urls.txt ok');
+      })
+    }
+
+    const all = res.reduce((prev, next)=> prev + '\n' + next, '')
+    // 写入总链接
+    fs.writeFile(`./match-urls.txt`, all,'utf8',function(err){
+      //如果err=null，表示文件使用成功，否则，表示希尔文件失败
+      if(err) {
+        console.log('写文件出错了，错误是：'+err);
+        return
+      }
+      console.log('生成 urls.txt ok');
+    })
   })
   .catch((err) => {
     console.log("err: ", err);
