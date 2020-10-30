@@ -108,15 +108,15 @@ const opt = {
   },
 };
 
-const opt2 = {
-  host: "121.40.239.167",
-  port: '9008',
-  method: "GET",
-  path: "/api/battle/common/getUrlList2",
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-  },
-};
+// const opt2 = {
+//   host: "121.40.239.167",
+//   port: '9008',
+//   method: "GET",
+//   path: "/api/battle/common/getUrlList2",
+//   headers: {
+//     "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+//   },
+// };
 
 const params = JSON.stringify({ gameType: "" });
 
@@ -172,36 +172,36 @@ fetch(opt)
     console.log("err: ", err);
   });
 
-fetch(opt2)
-  .then((res) => {
-    // console.log('res: ', res);
-    const maxNum = 2000
-    const maxLen = Math.ceil(res.length / maxNum)
-    // 百度自动提交一次只能 2000个
-    for(let k = 0; k < maxLen; k ++) {
-      const sliceArr = res.slice(k * maxNum, (k + 1) * maxNum)
-      const all = sliceArr.reduce((prev, next)=> prev + '\n' + next, '')
-      fs.writeFile(`./match-urls${k+1}.txt`, all,'utf8',function(err){
-        //如果err=null，表示文件使用成功，否则，表示希尔文件失败
-        if(err) {
-          console.log('写文件出错了，错误是：'+err);
-          return
-        }
-        console.log('生成 urls.txt ok');
-      })
-    }
+// fetch(opt2)
+//   .then((res) => {
+//     // console.log('res: ', res);
+//     const maxNum = 2000
+//     const maxLen = Math.ceil(res.length / maxNum)
+//     // 百度自动提交一次只能 2000个
+//     for(let k = 0; k < maxLen; k ++) {
+//       const sliceArr = res.slice(k * maxNum, (k + 1) * maxNum)
+//       const all = sliceArr.reduce((prev, next)=> prev + '\n' + next, '')
+//       fs.writeFile(`./match-urls${k+1}.txt`, all,'utf8',function(err){
+//         //如果err=null，表示文件使用成功，否则，表示希尔文件失败
+//         if(err) {
+//           console.log('写文件出错了，错误是：'+err);
+//           return
+//         }
+//         console.log('生成 urls.txt ok');
+//       })
+//     }
 
-    const all = res.reduce((prev, next)=> prev + '\n' + next, '')
-    // 写入总链接
-    fs.writeFile(`./match-urls.txt`, all,'utf8',function(err){
-      //如果err=null，表示文件使用成功，否则，表示希尔文件失败
-      if(err) {
-        console.log('写文件出错了，错误是：'+err);
-        return
-      }
-      console.log('生成 urls.txt ok');
-    })
-  })
-  .catch((err) => {
-    console.log("err: ", err);
-  });
+//     const all = res.reduce((prev, next)=> prev + '\n' + next, '')
+//     // 写入总链接
+//     fs.writeFile(`./match-urls.txt`, all,'utf8',function(err){
+//       //如果err=null，表示文件使用成功，否则，表示希尔文件失败
+//       if(err) {
+//         console.log('写文件出错了，错误是：'+err);
+//         return
+//       }
+//       console.log('生成 urls.txt ok');
+//     })
+//   })
+//   .catch((err) => {
+//     console.log("err: ", err);
+//   });
